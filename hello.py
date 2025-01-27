@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
 app = FastAPI()
 
@@ -8,7 +8,7 @@ items = []
 @app.get("/")
 def main():
     print("Hello from fastapi-demo!")
-    return "This is the main page!"
+    return Response("This is the main page!")
 
 
 @app.get("/hello")

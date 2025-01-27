@@ -144,4 +144,52 @@
    [tool.ruff.lint]
    extend-select = ["E", "W"]
    ```
+   
+9. [FastAPI Testing](https://fastapi.tiangolo.com/tutorial/testing/)
+
+   - FastAPI uses Starlette
+
+   ```shell
+   uv add pytest --dev
+   uv add httpx --dev
+   
+   uv run pytest test.py
+   ```
+   
+   - Add pytest configuration so it finds the tests for you. [See guide here](https://docs.pytest.org/en/stable/reference/customize.html)
+
+   ```toml
+   # pyproject.tolm
+   [tool.pytest.ini_options]
+   minversion = "6.0"
+   addopts = "-ra -q"
+   testpaths = [
+       "test.py", # example here
+       "tests",
+       "integration",
+   ]
+   ```
+   
+   - Test example:
+
+```python
+# test.py
+from fastapi.testclient import TestClient
+from hello import app
+
+client = TestClient(app)
+
+
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.text == "This is the main page!"
+
+
+def test_items():
+    response = client.get("/items")
+    assert response.status_code == 200
+    assert response.json() == []
+
+```
       
