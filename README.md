@@ -28,7 +28,7 @@
     pydantic - data validation
     '
    
-   uv add ruff --dev # dev dependency
+   uv add some_dependency --dev # dev dependency
     
     # if needed, install python like so:
     uv python install
@@ -128,4 +128,20 @@
       docker compose up 
       ```
 
+8. [Ruff Dependency](https://docs.astral.sh/ruff/tutorial/#getting-started) - Python linter and code formatter
+
+   ```shell
+   uv add ruff --dev # dev dependency
+   uv run ruff check # running ruff check on the app
+   uv run ruff check --fix # fixes errors linter found
+   uv run ruff format # formats the file in accordance to pep conventions
+   ``` 
+   
+   ```toml
+   # pyproject.toml
+   # add the following
+   
+   [tool.ruff.lint]
+   extend-select = ["E", "W"]
+   ```
       
