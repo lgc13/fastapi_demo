@@ -68,3 +68,64 @@
     uv venv 
     source my-env-name-here/bin/activate # 'activating' env making its pakages available
     ```
+   
+7. (Optional) Add Docker
+
+   1. Add a `Dockerfile`
+   2. You can use the code found [here](https://docs.astral.sh/uv/guides/integration/fastapi/#deployment) as a basis:
+   
+      ```dockerfile
+      FROM python:3.12-slim
+      
+      # Install uv.
+      COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+      
+      # Copy the application into the container.
+      COPY . /app
+      
+      # Install the application dependencies.
+      WORKDIR /app
+      RUN uv sync --frozen --no-cache
+      
+      # Run the application.
+      CMD ["/app/.venv/bin/fastapi", "run", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
+      ```
+   
+      ###### Change some of the variables to run with `uvicorn` instead of `fastapi`
+
+      ```dockerfile
+      # possibly a newer version
+      FROM python:3.13-slim 
+      
+      # use uvicorn: look at file `hello` then app object in that file
+      CMD ["/app/.venv/bin/uvicorn", "hello:app", "--port", "8000", "--host", "0.0.0.0"]
+      ```
+   3. Run Docker
+
+      ```shell
+      # build Docker image
+      docker build -t fastapi_my_image .
+      
+      # run it, mapping port 8000 on the host to the 8000 on the container
+      docker run -p 8000:8000 fastapi_my_image
+      ```
+      
+   4. (Alternatively) Using docker-compose:
+
+      ```yaml
+      # docker-compose.yaml
+      services:
+        backend:
+          image: fastapi_my_image:latest
+          container_name: fastapi_my_container
+          build: .
+          ports:
+            - "8000:8000"
+      ```
+      
+      ```shell
+      # builds the container, the image, then runs it
+      docker compose up 
+      ```
+
+      

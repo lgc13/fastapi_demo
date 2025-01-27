@@ -1,0 +1,7 @@
+services:
+  backend:
+    image: fastapi_my_image:latest
+    container_name: fastapi_my_container
+    build: .
+    ports:
+      - "8000:8000"
