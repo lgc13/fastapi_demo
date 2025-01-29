@@ -26,7 +26,7 @@ def create_item():
 
 @app.get("/items")
 def get_items():
-    print("Items in the list:", items)
+    print("UPDATED - Items in the list:", items)
     return items
 
 

@@ -40,6 +40,9 @@
    - Choose the one for: `~/YourProjectPath/.venv/bin/python`
    - Alternatively, the IDE might just pop up telling you to use the one for your project:
    - Settings > Project: Your_Project_Name_Here > Python Interpreter > Some pop up here saying to add the `.venv`
+   - ...
+   - If getting this error: warning: `VIRTUAL_ENV=/app/.venv` does not match the project environment path `.venv` and will be ignored
+     - [fix with this!](https://github.com/astral-sh/uv/issues/7073#issuecomment-2581842745)
    
 5. Create first api:
 
@@ -61,8 +64,8 @@
 6. Run server
 
     ```zsh
-    uv run hello.py # runs just the app
-    uv run uvicorn hello:app --reload # runs this in a server. reload will auto run if updates are made
+    uv run main.py # runs just the app
+    uv run uvicorn src.main:app --reload # runs this in a server. reload will auto run if updates are made
     
     # steps for venv: https://docs.astral.sh/uv/pip/environments/
     uv venv 
@@ -97,8 +100,8 @@
       # possibly a newer version
       FROM python:3.13-slim 
       
-      # use uvicorn: look at file `hello` then app object in that file
-      CMD ["/app/.venv/bin/uvicorn", "hello:app", "--port", "8000", "--host", "0.0.0.0"]
+      # use uvicorn: look at file `src/main` then app object in that file
+      CMD ["/app/.venv/bin/uvicorn", "src.main:app", "--port", "80", "--host", "0.0.0.0"]
       ```
    3. Run Docker
 
@@ -106,8 +109,8 @@
       # build Docker image
       docker build -t fastapi_my_image .
       
-      # run it, mapping port 8000 on the host to the 8000 on the container
-      docker run -p 8000:8000 fastapi_my_image
+      # run it, mapping port 8000 on the host to the 80 on the container
+      docker run -p 8000:80 fastapi_my_image
       ```
       
    4. (Alternatively) Using docker-compose:
@@ -116,16 +119,22 @@
       # docker-compose.yaml
       services:
         backend:
+          build: .
           image: fastapi_my_image:latest
           container_name: fastapi_my_container
-          build: .
+          command: uv run uvicorn src.main:app --host 0.0.0.0 --port 80 --reload # important
           ports:
-            - "8000:8000"
+            - "8000:80"
+          volumes: # important
+            - .:/app
       ```
       
       ```shell
       # builds the container, the image, then runs it
       docker compose up 
+      
+      # possible to prevent uneeded containers:
+      docker compose up --no-recreate
       ```
 
 8. [Ruff Dependency](https://docs.astral.sh/ruff/tutorial/#getting-started) - Python linter and code formatter
@@ -175,21 +184,21 @@
 ```python
 # test.py
 from fastapi.testclient import TestClient
-from hello import app
+from src.hello import app
 
 client = TestClient(app)
 
 
 def test_root():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.text == "This is the main page!"
+   response = client.get("/")
+   assert response.status_code == 200
+   assert response.text == "This is the main page!"
 
 
 def test_items():
-    response = client.get("/items")
-    assert response.status_code == 200
-    assert response.json() == []
+   response = client.get("/items")
+   assert response.status_code == 200
+   assert response.json() == []
 
 ```
       
