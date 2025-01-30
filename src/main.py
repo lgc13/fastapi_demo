@@ -14,7 +14,7 @@ def main():
 @app.get("/hello")
 def hello():
     print("Hello World from the /hello endpoint!")
-    return "Hello World!"
+    return "Hello World"
 
 
 @app.post("/items")

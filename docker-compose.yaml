@@ -3,8 +3,8 @@ services:
     build: .
     image: fastapi_my_image:latest
     container_name: fastapi_my_container
-    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 80 --reload
+    command: /app/.venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 80 --reload
     ports:
       - "8000:80"
     volumes:
-      - .:/app
+      - ./src:/app/src
