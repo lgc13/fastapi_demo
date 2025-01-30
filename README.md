@@ -187,24 +187,37 @@
    
    - Test example:
 
-```python
-# test.py
-from fastapi.testclient import TestClient
-from src.hello import app
+    ```python
+    # test.py
+    from fastapi.testclient import TestClient
+    from src.hello import app
+    
+    client = TestClient(app)
+    
+    
+    def test_root():
+       response = client.get("/")
+       assert response.status_code == 200
+       assert response.text == "This is the main page!"
+    
+    
+    def test_items():
+       response = client.get("/items")
+       assert response.status_code == 200
+       assert response.json() == []
+    
+    ```
 
-client = TestClient(app)
+10. Logger
 
-
-def test_root():
-   response = client.get("/")
-   assert response.status_code == 200
-   assert response.text == "This is the main page!"
-
-
-def test_items():
-   response = client.get("/items")
-   assert response.status_code == 200
-   assert response.json() == []
-
-```
-      
+    ```python
+    import logging
+    
+    
+    logger = logging.getLogger('uvicorn.error')
+    
+    @app.get("/")
+    def some_api():
+        logger.info("This will log to the console" )
+    ```
+          

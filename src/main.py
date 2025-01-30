@@ -1,38 +1,50 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, HTTPException
+import logging
 
 app = FastAPI()
+logger = logging.getLogger('uvicorn.error')
 
-items = []
+items: list[str] = []
 
 
 @app.get("/")
 def main():
-    print("Hello from fastapi-demo!")
+    logger.info("Hello from fastapi-demo!")
     return Response("This is the main page!")
 
 
-@app.get("/hello")
-def hello():
-    print("Hello World from the /hello endpoint!")
-    return "Hello World"
+@app.get("/items")
+def get_items(page: int = 1, size: int = 10):
+    logger.info(f">>> Getting items in the list with page {page} and size {size}" )
+
+    page_start = (page - 1) * size
+    page_end = page_start + size
+
+    return items[page_start:page_end]
 
 
 @app.post("/items")
 def create_item():
-    print("Creating item")
-    items.append("Item Inserted")
+    logger.info("Creating item")
+
+    items.append("NEW ITEM!")
     return items
 
+@app.get("/items/{item_id}")
+def get_item_by_id(item_id: int) -> str:
+    logger.info("Getting item by id:", item_id)
 
-@app.get("/items")
-def get_items():
-    print("UPDATED - Items in the list:", items)
-    return items
+    if item_id >= len(items):
+        raise HTTPException(status_code=404, detail="Item not found :(")
+
+    item = items[item_id]
+
+    return item
 
 
 @app.delete("/items")
 def delete_items():
-    print("Deleting all items!")
+    logger.info("Deleting all items!")
     items.clear()
     return items
 
