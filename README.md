@@ -221,3 +221,6 @@
         logger.info("This will log to the console" )
     ```
           
+11. Documentation
+
+    - Can be found on [Swagger - localhost:8000/docs](localhost:8000/docs) or [Redoc](localhost:8000/redoc)
