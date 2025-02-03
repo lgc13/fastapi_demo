@@ -224,3 +224,13 @@
 11. Documentation
 
     - Can be found on [Swagger - localhost:8000/docs](localhost:8000/docs) or [Redoc](localhost:8000/redoc)
+
+12. Mypy - static type checker
+
+    ```shell
+    uv add mypy --dev
+    ```
+    
+    - add `Mypy` plugin with PyCharm
+    - point it to `.venv/bin/mypy`
+

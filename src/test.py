@@ -5,19 +5,16 @@ client = TestClient(app)
 
 
 class TestMain:
-
     def test_root(self):
         """Should return some simple text"""
         response = client.get("/")
         assert response.status_code == 200
         assert response.text == "This is the main page!"
 
-
     def test_items(self):
         response = client.get("/items")
         assert response.status_code == 200
         assert response.json() == []
-
 
     def test_items_paginated(self):
         response1 = client.get("/items").json()
