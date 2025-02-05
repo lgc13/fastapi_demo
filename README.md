@@ -22,7 +22,7 @@
     examples:
     
     fastapi - web framework
-    sqlalchemy - DB
+    sqlalchemy - DB ORM
     alembic - DB migration tool
     uvicorn - web server
     pydantic - data validation
