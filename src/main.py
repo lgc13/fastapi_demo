@@ -1,56 +1,16 @@
-from contextlib import asynccontextmanager
-from typing import Annotated, Optional, cast, Any
+from typing import Optional, cast, Any
 
-from fastapi import FastAPI, Response, HTTPException, Depends
+from fastapi import FastAPI, Response, HTTPException
 import logging
-from pydantic import BaseModel
-from sqlmodel import SQLModel, Field, create_engine, Session, select, delete
+from sqlmodel import select, delete
 
-
-class Item(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    text: str
-    is_complete: bool
-
-
-class ItemRequest(BaseModel):
-    text: str
-
-
-class ItemPatchRequest(BaseModel):
-    is_complete: bool
-
-
-# Database setup
-DATABASE_URL = "sqlite:///database.db"
-connect_args = {"check_same_thread": False} # use the same db in different threads
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
-
-
-def get_session():
-    """
-        Session will store the objects in memory.
-        Engine will communicate with the db.
-        yield wil provide a new Session for each request
-    """
-    with Session(engine) as session:
-        yield session
-
-SessionDep = Annotated[Session, Depends(get_session)]
-
-# To create the table models
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    print(f">>> in lifespan: {_app}")
-    create_db_and_tables()
-    yield
+from src.database import lifespan, SessionDep
+from src.models import ItemPatchRequest, ItemRequest, Item
 
 app = FastAPI(lifespan=lifespan)
 logger = logging.getLogger("uvicorn.error")
 items: list[Item] = []
+
 
 @app.get("/")
 def main():
@@ -70,11 +30,13 @@ def create_item(item_request: ItemRequest, session: SessionDep) -> Item:
 
     return new_item
 
+
 @app.get("/items", response_model=list[Item])
 def get_items(session: SessionDep, page: int = 0, size: int = 10) -> list[Item]:
     logger.info(f">>> Getting items in the list with page {page} and size {size}")
 
     return list(session.exec(select(Item).offset(page).limit(size)).all())
+
 
 @app.get("/items/{item_id}")
 def get_item_by_id(item_id: int, session: SessionDep) -> Item:
@@ -118,6 +80,8 @@ def delete_item_by_id(item_id: int, session: SessionDep) -> None:
     item = get_item_by_id(item_id, session)
     session.delete(item)
     session.commit()
+
+    logger.info(f">>> Item {item_id} was deleted!")
 
 
 if __name__ == "__main__":
